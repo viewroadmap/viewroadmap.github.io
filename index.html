@@ -38,7 +38,7 @@
 			if (Object.keys(document.roadmap.providers).includes(providerName)) {
 				const provider = document.roadmap.providers[providerName];
 				
-				provider.getRoadmap("AceKiron", "PronounMC").then((res) => {
+				provider.getRoadmap("viewroadmap", "example").then((res) => {
 					res.features.forEach((feature) => {
 						if (!feature.name) feature.name = "Unnamed feature";
 						if (!feature.status) feature.status = "pending";
