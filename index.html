@@ -89,13 +89,16 @@
         <script>
             let providerName = getQuery("provider");
             if (!providerName) providerName = "github";
-        
+
+            let user = getQuery("user");
+            let repo = getQuery("repo");
+            
             if (Object.keys(document.roadmap.providers).includes(providerName)) {
                 const provider = document.roadmap.providers[providerName];
                 
                 const table = document.body.querySelector("table");
 
-                provider.getRoadmap("viewroadmap", "example").then((res) => {
+                provider.getRoadmap(user, repo).then((res) => {
                     res.features.forEach((feature) => {
                         if (!feature.name) feature.name = "Unnamed feature";
                         if (!feature.assignees) feature.assignees = [];
