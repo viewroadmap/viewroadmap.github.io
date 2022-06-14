@@ -1,57 +1,126 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>ViewRoadmap</title>
-	</head>
-	<body>
-		<table width="100%">
-			<th>Name</th>
-			<th>Assignees</th>
-			<th>Version</th>
-			<th>Status</th>
-			<th>Priority</th>
-			
-			<tr>
-				<td>Unnamed feature</td>
-				<td></td>
-				<td></td>
-				<td>Pending</td>
-				<td>Normal</td>
-			</tr>
-		</table>
-	
-		<script>
-			document.roadmap = {
-				providers: {}
-			};
-			
-			function getQuery(name) {
-				return Object.fromEntries(new URLSearchParams(window.location.search).entries())[name];
-			}
-		</script>
-		<script src="js/github.js"></script>
-		
-		<script>
-			let providerName = getQuery("provider");
-			if (!providerName) providerName = "github";
-		
-			if (Object.keys(document.roadmap.providers).includes(providerName)) {
-				const provider = document.roadmap.providers[providerName];
-				
-				provider.getRoadmap("viewroadmap", "example").then((res) => {
-					res.features.forEach((feature) => {
-						if (!feature.name) feature.name = "Unnamed feature";
-						if (!feature.status) feature.status = "pending";
-						if (!feature.assignees) feature.assignees = [];
-						if (!feature.version) feature.version = "";
-						if (!feature.priority) feature.priority = "normal";
-						
-						//alert(JSON.stringify(feature));
-					});
-				});
-			} else {
-				// Provider wasn't found
-			}
-		</script>
-	</body>
+    <head>
+        <title>ViewRoadmap</title>
+
+        <style>
+            td {
+                border-top: 1px solid black;
+
+                padding: 6px;
+            }
+
+            td:not(:nth-child(1)) {
+                border-left: 1px solid black;
+            }
+
+            .panel {
+                padding: 4px 12px;
+                text-align: center;
+
+                display: block;
+                width: 10vw;
+            }
+
+            .status-released { background: lime; }
+            .status-beta { background: orange; }
+            .status-indev { background: yellow; }
+            .status-pending { background: lightgray; }
+
+            .priority-critical { background: black; color: white; }
+            .priority-high { background: maroon; color: white; }
+            .priority-normal { background: orange; }
+            .priority-low { background: lime; }
+        </style>
+    </head>
+    <body>
+        <table width="100%">
+            <th>Name</th>
+            <th>Assignees</th>
+            <th style="width: 10vw;">Version</th>
+            <th style="width: calc(10vw + 8px);">Status</th>
+            <th style="width: calc(10vw + 8px);">Priority</th>
+        </table>
+    
+        <script>
+            document.roadmap = {
+                providers: {}
+            };
+            
+            function getQuery(name) {
+                return Object.fromEntries(new URLSearchParams(window.location.search).entries())[name];
+            }
+
+            function makeNewHTMLElement(tagName, attributes={}, children = []) {
+                let newElement = document.createElement(tagName);
+                
+                for (const key in attributes) {
+                    if (attributes[key] != undefined) newElement.setAttribute(key, attributes[key]);
+                }
+
+                children.forEach(child => {
+                    if (Array.isArray(child)) child.forEach(innerChild => {newElement.append(innerChild)});
+                    else newElement.append(child);
+                });
+
+                return newElement;
+            }
+
+            function getStatusString(status) {
+                switch (status) {
+                    case "released": return "Released";
+                    case "beta": return "In Beta";
+                    case "indev": return "In Development";
+                    case "pending": return "Pending";
+                }
+            }
+
+            function getPriorityString(priority) {
+                switch (priority) {
+                    case "critical": return "Critical";
+                    case "high": return "High";
+                    case "normal": return "Normal";
+                    case "low": return "Low";
+                }
+            }
+        </script>
+        <script src="js/github.js"></script>
+        
+        <script>
+            let providerName = getQuery("provider");
+            if (!providerName) providerName = "github";
+        
+            if (Object.keys(document.roadmap.providers).includes(providerName)) {
+                const provider = document.roadmap.providers[providerName];
+                
+                const table = document.body.querySelector("table");
+
+                provider.getRoadmap("viewroadmap", "example").then((res) => {
+                    res.features.forEach((feature) => {
+                        if (!feature.name) feature.name = "Unnamed feature";
+                        if (!feature.assignees) feature.assignees = [];
+                        if (!feature.version) feature.version = "";
+                        if (!feature.status) feature.status = "pending";
+                        if (!feature.priority) feature.priority = "normal";
+
+                        table.appendChild(
+                            makeNewHTMLElement("tr", {}, [
+                                makeNewHTMLElement("td", { class: "name" }, [ feature.name ]),
+                                makeNewHTMLElement("td", { class: "assignees" }, [ feature.assignees.join(", ") ]),
+                                makeNewHTMLElement("td", { class: "version" }, [ feature.version ]),
+                                makeNewHTMLElement("td", { class: "status" }, [
+                                    makeNewHTMLElement("span", { class: `panel status-${feature.status}` }, [ getStatusString(feature.status) ])
+                                ]),
+                                makeNewHTMLElement("td", { class: "priority" }, [
+                                    makeNewHTMLElement("span", { class: `panel priority-${feature.priority}` }, [ getPriorityString(feature.priority) ])
+                                ]),
+                            ])
+                        );
+                    });
+                });
+            } else {
+                // Provider wasn't found
+            }
+        </script>
+    </body>
 </html>

@@ -3,7 +3,7 @@ document.roadmap.providers.github = {
 		return new Promise(async (res, rej) => {
 			const response = await fetch(`https://raw.githubusercontent.com/${user}/${repo}/${branch}/ROADMAP`);
 			const json = await response.json();
-			
+
 			res(json);
 		});
     }
